@@ -8,19 +8,19 @@
     "net8.0": []
   },
   "packageFolders": {
-    "/Users/royjackman/.nuget/packages/": {}
+    "/Users/jackkenney/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/royjackman/Documents/gitstuff/CarPool/FrontEnd/FrontEnd.csproj",
+      "projectUniqueName": "/Users/jackkenney/CarPool/FrontEnd/FrontEnd.csproj",
       "projectName": "FrontEnd",
-      "projectPath": "/Users/royjackman/Documents/gitstuff/CarPool/FrontEnd/FrontEnd.csproj",
-      "packagesPath": "/Users/royjackman/.nuget/packages/",
-      "outputPath": "/Users/royjackman/Documents/gitstuff/CarPool/FrontEnd/obj/",
+      "projectPath": "/Users/jackkenney/CarPool/FrontEnd/FrontEnd.csproj",
+      "packagesPath": "/Users/jackkenney/.nuget/packages/",
+      "outputPath": "/Users/jackkenney/CarPool/FrontEnd/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/royjackman/.nuget/NuGet/NuGet.Config"
+        "/Users/jackkenney/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
