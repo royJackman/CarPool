@@ -1,0 +1,109 @@
+```gitignore
+# .NET MAUI Project .gitignore
+## Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm][Ss]/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]/
+## Comment out if you have a dependency on these directories
+node_modules/
+bower_components/
+## NPM package and lock files
+npm-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+## OS-specific files
+.DS_Store
+Thumbs.db
+## VS Code settings folder
+.vscode/
+## Rider settings folder
+.idea/
+## User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+## ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+## Dotnet Build Artifacts
+bin/
+obj/
+## .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+## Android
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+*.aar
+*.so
+*.proguard
+*.gradle
+*.keystore
+## iOS
+*.app
+*.ipa
+*.dSYM/
+*.xcuserstate
+*.xcworkspace
+*.xcscheme
+*.xcuserdata
+*.xcodeproj
+*.xcodeproj/project.xcworkspace/xcuserdata
+*.xcodeproj/xcshareddata/xcschemes
+*.xcodeproj/xcuserdata/$(USER_NAME).xcuserdatad
+## Secrets
+*.pfx
+*.p12
+*.key
+*.pem
+*.cer
+# Mac
+*.DS_Store
+# Windows
+*.log
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.swp
+*.swo
+*.swo
+# Others
+*.class
+*.pyc
+*.pyo
+*.pyd
+*.swp
+*.swo
+*.tmp
+*.bak
+*.orig
+*.swp
+*.swo
+*.swo
+*.tmp
+*.log
+*.diff
+*.patch
+# Ignore all temporary files and folders
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*.log
+*.DS_Store
+.goutputstream-
+# Ignore packages directory from NuGet
+**/packages/
