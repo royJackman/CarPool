@@ -3,7 +3,9 @@ name = "back_end"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 actix-web = "4"
+diesel = { version = "2.2.0", features = ["sqlite", "returning_clauses_for_sqlite_3_35", "r2d2"] }
+dotenvy = "0.15"
+r2d2 = "0.8.10"
+serde = { version = "1.0", features = ["derive"] }
