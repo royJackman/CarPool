@@ -1,42 +1,61 @@
 @page "/calendar"
 @attribute [StreamRendering]
+@using System.Collections.Generic;
+@using System.Linq;
 
 <PageTitle>Calendar</PageTitle>
 
 <h1>Calendar</h1>
 
-@if (cars == null || reservations == null)
+@if (cars == null || reservations == null || days == null)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
     <table>
-
     @for (int r = 0; r < 5; r++)
         {
             <tr>
                 @for (int c = 0; c < 7; c++)
                 {
-                    <td>
-                        Day
+                    var i = r * 7 + c;
+                    var day = days[i];
+                    var date = day.Date;
+                    var reservations = day.Reservations;
+                    <td class="@(date < DateTime.Now ? "past" : "")">
+                        @if (date != null)
+                        {
+                            <text>@(days[i].Date)</text>
+                        }
+
+                        @if (reservations != null)
+                        {
+                            @foreach (Reservation res in reservations)
+                            {
+                                <p>@(res.UserName)</p>
+                                <p>@(res.CarName)</p>
+                                <p>@(res.Description)</p>
+                            }
+                        }
                     </td>
                 }
             </tr>
+
         }
     </table>
 }
 
 @code {
-    private Car[]? cars;
-    private Reservation[]? reservations;
+
+    protected Car[]? cars;
+    protected Reservation[]? reservations;
+    protected Day[]? days;
+
     protected override async Task OnInitializedAsync()
     {
         cars = await Car.FetchCars();
         reservations = await Reservation.FetchReservations();
-    }
-    protected Reservation[] getDayReservations(int row, int column)
-    {
-
+        days = await Day.getDays(reservations);
     }
 }

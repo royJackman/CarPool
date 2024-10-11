@@ -1,3 +1,5 @@
+namespace FrontEnd;
+
 public class Car
 {
     public Car(int id, string name)
