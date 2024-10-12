@@ -5,14 +5,14 @@ using System.Linq;
 
 public class Day
 {
-    public Day(DateTime? date, Reservation[]? reservations)
+    public Day(DateTime date, Reservation[] reservations)
     {
         Date = date;
         Reservations = reservations;
     }
-    public DateTime? Date;
-    public Reservation[]? Reservations;
-    public static Task<Day[]> getDays(Reservation[] reservations)
+    public DateTime Date;
+    public Reservation[] Reservations;
+    public static Task<Day?[]> getDays(Reservation[] reservations)
     {
         // get current day
         DateTime now = DateTime.Now;
@@ -21,9 +21,9 @@ public class Day
         int firstCell = (int)(first.DayOfWeek); // weekday number after cast
 
         // fill cells
-        List<Day> calendar = new List<Day>();
+        List<Day?> calendar = new List<Day?>();
         for (int i = 0; i < firstCell; i++)
-            calendar.Add(new Day(null, null));
+            calendar.Add(null);
 
         // render rest of the month in days in order
         for (int d = 0; d <= DateTime.DaysInMonth(now.Year, now.Month) - now.Day; d++)
@@ -40,7 +40,7 @@ public class Day
         }
 
         for (int i = calendar.Count(); i <= 35; i++)
-            calendar.Add(new Day(null, null));
+            calendar.Add(null);
 
 
         return Task.FromResult(calendar.ToArray());

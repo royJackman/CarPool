@@ -21,36 +21,33 @@ else
                 {
                     var i = r * 7 + c;
                     var day = days[i];
-                    var date = day.Date;
-                    var reservations = day.Reservations;
-                    <td class="@(date < DateTime.Now ? "past" : "")">
-                        @if (date != null)
+                    <td>
+                        @if (day != null)
                         {
-                            <text>@(days[i].Date)</text>
-                        }
+                            var date = day.Date;
+                            var reservations = day.Reservations;
+                            <div class="@(date < DateTime.Now ? "past" : "")">
+                                <text>@(day.Date)</text>
 
-                        @if (reservations != null)
-                        {
-                            @foreach (Reservation res in reservations)
-                            {
-                                <p>@(res.UserName)</p>
-                                <p>@(res.CarName)</p>
-                                <p>@(res.Description)</p>
-                            }
+                                @foreach (Reservation res in reservations)
+                                {
+                                    <p>@(res.UserName)</p>
+                                    <p>@(res.CarName)</p>
+                                    <p>@(res.Description)</p>
+                                }
+                            </div>
                         }
                     </td>
                 }
             </tr>
-
         }
     </table>
 }
 
 @code {
-
     protected Car[]? cars;
     protected Reservation[]? reservations;
-    protected Day[]? days;
+    protected Day?[]? days;
 
     protected override async Task OnInitializedAsync()
     {
