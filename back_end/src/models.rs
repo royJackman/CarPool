@@ -21,19 +21,19 @@ pub struct NewCar {
 pub struct Reservation {
     pub id: i32,
     pub description: Option<String>,
-    pub startTime: i32,
-    pub endTime: i32,
-    pub userId: i32,
-    pub carId: i32,
+    pub start_time: i32,
+    pub end_time: i32,
+    pub user_id: i32,
+    pub car_id: i32,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct NewReservation {
     pub description: Option<String>,
-    pub startTime: i32,
-    pub endTime: i32,
-    pub userId: i32,
-    pub carId: i32,
+    pub start_time: i32,
+    pub end_time: i32,
+    pub user_id: i32,
+    pub car_id: i32,
 }
 
 #[derive(Queryable, Selectable, Serialize, Deserialize, Insertable, Clone, Debug)]

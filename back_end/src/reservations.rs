@@ -7,11 +7,7 @@ type DbError = Box<dyn std::error::Error + Send + Sync>;
 
 pub fn insert_new_reservation(
     conn: &mut SqliteConnection,
-    desc: Option<String>,
-    start_time: i32,
-    end_time: i32,
-    car_id: i32,
-    user_id: i32,
+    new_reservation: &NewReservation,
 ) -> Result<Reservation, DbError> {
     use crate::schema::reservations::dsl::*;
 
@@ -22,11 +18,11 @@ pub fn insert_new_reservation(
     
     let new_reservation = Reservation {
         id: count as i32,
-        description: desc,
-        startTime: start_time,
-        endTime: end_time,
-        carId: car_id,
-        userId: user_id
+        description: new_reservation.description.to_owned(),
+        start_time: new_reservation.start_time,
+        end_time: new_reservation.end_time,
+        car_id: new_reservation.car_id,
+        user_id: new_reservation.user_id,
     };
 
     let res = diesel::insert_into(reservations)
@@ -43,18 +39,11 @@ async fn add_reservation(
     pool: web::Data<DbPool>,
     form: web::Json<NewReservation>
 ) -> actix_web::Result<impl Responder> {
-    assert!(form.startTime < form.endTime);
+    assert!(form.start_time < form.end_time);
 
     let res = web::block(move || {
         let mut conn = pool.get()?;
-        insert_new_reservation(
-            &mut conn,
-            form.description.clone(),
-            form.startTime,
-            form.endTime,
-            form.carId,
-            form.userId
-        )
+        insert_new_reservation(&mut conn, &form)
     })
     .await?
     .map_err(error::ErrorInternalServerError)?;
@@ -86,19 +75,7 @@ async fn get_reservation(
     .await?
     .map_err(error::ErrorInternalServerError)?;
 
-    Ok(HttpResponse::Ok().body(
-        format!(
-            "Reservation\nID: {}\nDescription: {}\nStart time: {}\nEnd time: {}\nCar ID: {}\nUser Id: {}",
-            reservation.id,
-            match reservation.description {
-                Some(d) => d, None => "".to_owned()
-            },
-            reservation.startTime,
-            reservation.endTime,
-            reservation.carId,
-            reservation.userId
-        )
-    ))
+    Ok(HttpResponse::Created().json(reservation))
 }
 
 pub fn find_all_reservations(
@@ -120,10 +97,5 @@ async fn get_reservations(
     .await?
     .map_err(error::ErrorInternalServerError)?;
 
-    Ok(HttpResponse::Ok().body(
-        results.iter()
-               .map(|res| format!("{} {} {}", res.id, res.startTime, res.endTime))
-               .collect::<Vec<String>>()
-               .join("\n")
-    ))
+    Ok(HttpResponse::Created().json(results))
 }

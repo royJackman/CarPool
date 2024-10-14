@@ -11,10 +11,10 @@ diesel::table! {
     reservations (id) {
         id -> Integer,
         description -> Nullable<Text>,
-        startTime -> Integer,
-        endTime -> Integer,
-        userId -> Integer,
-        carId -> Integer,
+        start_time -> Integer,
+        end_time -> Integer,
+        user_id -> Integer,
+        car_id -> Integer,
     }
 }
 

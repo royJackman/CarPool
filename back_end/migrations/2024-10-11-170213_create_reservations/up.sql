@@ -1,10 +1,10 @@
 CREATE TABLE reservations(
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     description TEXT,
-    startTime INTEGER NOT NULL,
-    endTime INTEGER NOT NULL,
-    userId INTEEGER NOT NULL,
-    carId INTEEGER NOT NULL,
-    FOREIGN KEY (userId) REFERENCES Users(userId),
-    FOREIGN KEY (carID) REFERENCES Cars(carId)
+    start_time INTEGER NOT NULL,
+    end_time INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    car_id INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id),
+    FOREIGN KEY (car_id) REFERENCES Cars(car_id)
 )
