@@ -1,4 +1,4 @@
-use actix_web::{error, get, post, web, HttpResponse, Responder};
+use actix_web::{error, get, post, web, Responder};
 use diesel::{prelude::*, r2d2};
 use crate::models::{Reservation, NewReservation};
 
@@ -48,7 +48,7 @@ async fn add_reservation(
     .await?
     .map_err(error::ErrorInternalServerError)?;
 
-    Ok(HttpResponse::Created().json(res))
+    Ok(web::Json(res))
 }
 
 pub fn find_one_reservation(
@@ -75,7 +75,7 @@ async fn get_reservation(
     .await?
     .map_err(error::ErrorInternalServerError)?;
 
-    Ok(HttpResponse::Created().json(reservation))
+    Ok(web::Json(reservation))
 }
 
 pub fn find_all_reservations(
@@ -97,5 +97,5 @@ async fn get_reservations(
     .await?
     .map_err(error::ErrorInternalServerError)?;
 
-    Ok(HttpResponse::Created().json(results))
+    Ok(web::Json(results))
 }

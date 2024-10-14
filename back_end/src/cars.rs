@@ -1,4 +1,4 @@
-use actix_web::{error::{self, ErrorInternalServerError}, get, post, web, HttpResponse, Responder};
+use actix_web::{error, get, post, web, Responder};
 use diesel::{r2d2, prelude::*};
 use crate::models::{Car, NewCar};
 
@@ -16,10 +16,7 @@ pub fn insert_new_car(
         .get_result::<i64>(conn)
         .expect("Issue counting cars");
 
-    let new_car = Car {
-        id: count as i32,
-        name: nm.to_owned(),
-    };
+    let new_car = Car { id: count as i32, name: nm.to_owned() };
 
     let res = diesel::insert_into(cars)
         .values(&new_car)
@@ -42,7 +39,7 @@ async fn add_car(
     .await?
     .map_err(error::ErrorInternalServerError)?;
 
-    Ok(HttpResponse::Created().json(car))
+    Ok(web::Json(car))
 }
 
 pub fn find_one_car(
@@ -67,18 +64,15 @@ async fn get_car(
         find_one_car(&mut conn, &car_id)
     })
     .await?
-    .map_err(ErrorInternalServerError)?;
+    .map_err(error::ErrorInternalServerError)?;
 
-    Ok(HttpResponse::Ok().body(
-        format!("Car\nID: {}\nName: {}", car.id, car.name)
-    ))
+    Ok(web::Json(car))
 }
 
 pub fn find_all_cars(
     conn: &mut SqliteConnection,
 ) -> Result<Vec<Car>, DbError> {
-    use crate::schema::cars::dsl::*;
-    let results = cars.load(conn).expect("Error loading cars");
+    let results = crate::schema::cars::dsl::cars.load(conn).expect("Error loading cars");
     Ok(results)
 }
 
@@ -93,10 +87,5 @@ async fn get_cars(
     .await?
     .map_err(error::ErrorInternalServerError)?;
 
-    Ok(HttpResponse::Ok().body(
-        results.iter()
-               .map(|car| format!("{} {}", car.id, car.name))
-               .collect::<Vec<String>>()
-               .join("\n")
-    ))
+    Ok(web::Json(results))
 }

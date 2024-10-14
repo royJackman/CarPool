@@ -1,4 +1,4 @@
-use actix_web::{error, get, post, web, HttpResponse, Responder};
+use actix_web::{error, get, post, web, Responder};
 use diesel::{r2d2, prelude::*};
 use crate::models::{User, NewUser};
 
@@ -16,10 +16,7 @@ pub fn insert_new_user(
         .get_result::<i64>(conn)
         .expect("Issue counting users");
 
-    let new_user = User {
-        id: count as i32,
-        name: nm.to_owned(),
-    };
+    let new_user = User { id: count as i32, name: nm.to_owned() };
 
     let res = diesel::insert_into(users)
         .values(&new_user)
@@ -42,7 +39,7 @@ async fn add_user(
     .await?
     .map_err(error::ErrorInternalServerError)?;
 
-    Ok(HttpResponse::Created().json(usr))
+    Ok(web::Json(usr))
 }
 
 pub fn find_one_car(
@@ -69,9 +66,7 @@ async fn get_user(
     .await?
     .map_err(error::ErrorInternalServerError)?;
 
-    Ok(HttpResponse::Ok().body(
-        format!("User\nID: {}\nName: {}", usr.id, usr.name)
-    ))
+    Ok(web::Json(usr))
 }
 
 pub fn find_all_users(
@@ -93,10 +88,5 @@ async fn get_users(
     .await?
     .map_err(error::ErrorInternalServerError)?;
 
-    Ok(HttpResponse::Ok().body(
-        results.iter()
-               .map(|usr| format!("{} {}", usr.id, usr.name))
-               .collect::<Vec<String>>()
-               .join("\n")
-    ))
+    Ok(web::Json(results))
 }
