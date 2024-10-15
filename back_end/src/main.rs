@@ -7,6 +7,10 @@ mod reservations;
 mod schema;
 mod users;
 
+use cars::{add_car, get_car, get_cars, update_car, delete_single_car};
+use reservations::{add_reservation, get_reservation, get_reservations, update_reservation, delete_single_reservation};
+use users::{add_user, get_user, get_users, update_user, delete_single_user};
+
 type DbPool = r2d2::Pool<r2d2::ConnectionManager::<SqliteConnection>>;
 
 fn initialize_db_pool() -> DbPool {
@@ -25,15 +29,9 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(pool.clone()))
-            .service(cars::add_car)
-            .service(cars::get_car)
-            .service(cars::get_cars)
-            .service(reservations::add_reservation)
-            .service(reservations::get_reservation)
-            .service(reservations::get_reservations)
-            .service(users::add_user)
-            .service(users::get_user)
-            .service(users::get_users)
+            .service(add_car).service(get_car).service(get_cars).service(update_car).service(delete_single_car)
+            .service(add_reservation).service(get_reservation).service(get_reservations).service(update_reservation).service(delete_single_reservation)
+            .service(add_user).service(get_user).service(get_users).service(update_user).service(delete_single_user)
     })
     .bind(("127.0.0.1", 8080))?
     .run()

@@ -1,101 +1,91 @@
-use actix_web::{error, get, post, web, Responder};
-use diesel::{prelude::*, r2d2};
+use actix_web::{error, get, post, put, delete, web, Responder};
+use diesel::{dsl::exists, prelude::*, r2d2};
 use crate::models::{Reservation, NewReservation};
+use crate::schema::reservations::dsl::*;
+use crate::schema::cars::dsl as car_dsl;
+use crate::schema::users::dsl as users_dsl;
 
 type DbPool = r2d2::Pool<r2d2::ConnectionManager::<SqliteConnection>>;
-type DbError = Box<dyn std::error::Error + Send + Sync>;
-
-pub fn insert_new_reservation(
-    conn: &mut SqliteConnection,
-    new_reservation: &NewReservation,
-) -> Result<Reservation, DbError> {
-    use crate::schema::reservations::dsl::*;
-
-    let count = reservations
-        .count()
-        .get_result::<i64>(conn)
-        .expect("Issue counting reservations");
-    
-    let new_reservation = Reservation {
-        id: count as i32,
-        description: new_reservation.description.to_owned(),
-        start_time: new_reservation.start_time,
-        end_time: new_reservation.end_time,
-        car_id: new_reservation.car_id,
-        user_id: new_reservation.user_id,
-    };
-
-    let res = diesel::insert_into(reservations)
-        .values(&new_reservation)
-        .returning(Reservation::as_returning())
-        .get_result(conn)
-        .expect("Error inserting reservation");
-
-    Ok(res)
-}
 
 #[post("/reservations")]
-async fn add_reservation(
-    pool: web::Data<DbPool>,
-    form: web::Json<NewReservation>
-) -> actix_web::Result<impl Responder> {
-    assert!(form.start_time < form.end_time);
-
+async fn add_reservation(pool: web::Data<DbPool>, form: web::Json<NewReservation>) -> actix_web::Result<impl Responder> {
+    let failure_state = Reservation {
+        id: -1,
+        description: form.description.to_owned(),
+        start_time: form.start_time.to_owned(),
+        end_time: form.end_time.to_owned(),
+        car_id: form.car_id.to_owned(),
+        user_id: form.user_id.to_owned(),
+    };
+    if form.end_time <= form.start_time {
+        return Ok(web::Json(failure_state));
+    }
     let res = web::block(move || {
-        let mut conn = pool.get()?;
-        insert_new_reservation(&mut conn, &form)
-    })
-    .await?
-    .map_err(error::ErrorInternalServerError)?;
+        let mut conn = pool.get().map_err(error::ErrorInternalServerError).unwrap();
+        
+        let car_exists = diesel::select(exists(car_dsl::cars.filter(car_dsl::id.eq(form.car_id))))
+            .get_result::<bool>(&mut conn).unwrap();
 
-    Ok(web::Json(res))
-}
+        let user_exists = diesel::select(exists(users_dsl::users.filter(users_dsl::id.eq(form.user_id))))
+            .get_result::<bool>(&mut conn).unwrap();
+        
+        return match (car_exists, user_exists) {
+            (true, true) => Ok(diesel::insert_into(reservations)
+                .values(form.to_owned())
+                .returning(Reservation::as_returning())
+                .get_result::<Reservation>(&mut conn)
+                .expect("Error inserting reservation")),
+            _ => Err(failure_state)
+        };
+    }).await?;
 
-pub fn find_one_reservation(
-    conn: &mut SqliteConnection,
-    rid: &i32,
-) -> Result<Reservation, DbError> {
-    use crate::schema::reservations::dsl::*;
-    let result = reservations.filter(id.eq(rid))
-        .first(conn)
-        .expect(format!("Cannot find reservation with id {}", rid).as_str());
-
-    Ok(result)
+    Ok(web::Json(res.unwrap()))
 }
 
 #[get("/reservations/{reservation_id}")]
-async fn get_reservation(
-    pool: web::Data<DbPool>,
-    reservation_id: web::Path<i32>,
-) -> actix_web::Result<impl Responder> {
+async fn get_reservation(pool: web::Data<DbPool>, reservation_id: web::Path<i32>) -> actix_web::Result<impl Responder> {
     let reservation = web::block(move || {
-        let mut conn = pool.get()?;
-        find_one_reservation(&mut conn, &reservation_id)
-    })
-    .await?
-    .map_err(error::ErrorInternalServerError)?;
+        let mut conn = pool.get().map_err(error::ErrorInternalServerError).unwrap();
+        reservations.filter(id.eq(reservation_id.to_owned()))
+            .first::<Reservation>(&mut conn)
+            .expect(format!("Cannot find reservation with id {}", reservation_id).as_str())
+    }).await?;
 
     Ok(web::Json(reservation))
 }
 
-pub fn find_all_reservations(
-    conn: &mut SqliteConnection,
-) -> Result<Vec<Reservation>, DbError> {
-    use crate::schema::reservations::dsl::*;
-    let results = reservations.load(conn).expect("Error loading reservations");
-    Ok(results)
-}
-
 #[get("/reservations")]
-async fn get_reservations(
-    pool: web::Data<DbPool>
-) -> actix_web::Result<impl Responder> {
+async fn get_reservations(pool: web::Data<DbPool>) -> actix_web::Result<impl Responder> {
     let results = web::block(move || {
-        let mut conn = pool.get()?;
-        find_all_reservations(&mut conn)
-    })
-    .await?
-    .map_err(error::ErrorInternalServerError)?;
+        let mut conn = pool.get().map_err(error::ErrorInternalServerError).unwrap();
+        reservations.load::<Reservation>(&mut conn).expect("Error loading reservations")
+    }).await?;
 
     Ok(web::Json(results))
+}
+
+#[put("/reservations")]
+async fn update_reservation(pool: web::Data<DbPool>, form: web::Json<Reservation>) -> actix_web::Result<impl Responder> {
+    let updated_res = web::block(move || {
+        let mut conn = pool.get().map_err(error::ErrorInternalServerError).unwrap();
+        diesel::update(reservations.filter(id.eq(&form.id)))
+            .set(form.to_owned())
+            .execute(&mut conn)
+            .expect(format!("Couldn't update reservation with id {}", &form.id).as_str())
+    }).await?;
+
+    Ok(web::Json(updated_res))
+}
+
+#[delete("/reservations/{res_id}")]
+async fn delete_single_reservation(pool: web::Data<DbPool>, res_id: web::Path<i32>) -> actix_web::Result<impl Responder> {
+    let completed = web::block(move || {
+        let mut conn = pool.get().map_err(error::ErrorInternalServerError).unwrap();
+        let res = diesel::delete(reservations)
+            .filter(id.eq(res_id.to_owned()))  
+            .execute(&mut conn);
+        match res { Ok(n) if n == 1 => Ok(()), _ => Err(()) }
+    }).await?;
+
+    Ok(match completed { Ok(_) => web::Json(true), Err(_) => web::Json(false) })
 }

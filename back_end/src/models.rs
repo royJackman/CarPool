@@ -9,13 +9,15 @@ pub struct Car {
     pub name: String,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Insertable)]
+#[diesel(table_name = crate::schema::cars)]
 pub struct NewCar {
+    pub id: Option<i32>,
     pub name: String,
 }
 
 
-#[derive(Queryable, Selectable, Serialize, Deserialize, Insertable, Clone, Debug)]
+#[derive(Queryable, Selectable, Serialize, Deserialize, Insertable, Clone, Debug, AsChangeset)]
 #[diesel(table_name = crate::schema::reservations)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Reservation {
@@ -27,8 +29,10 @@ pub struct Reservation {
     pub car_id: i32,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Insertable)]
+#[diesel(table_name = crate::schema::reservations)]
 pub struct NewReservation {
+    pub id: Option<i32>,
     pub description: Option<String>,
     pub start_time: i32,
     pub end_time: i32,
@@ -44,7 +48,9 @@ pub struct User {
     pub name: String,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Insertable)]
+#[diesel(table_name = crate::schema::users)]
 pub struct NewUser {
+    pub id: Option<i32>,
     pub name: String,
 }
