@@ -1,3 +1,7 @@
 Debug
 *.lock
 target
+obj
+Debug
+*.sqlite3
+__pycache__
